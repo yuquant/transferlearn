@@ -2,7 +2,7 @@
 """
 Author : Jason
 Github : https://github.com/yuquant
-Description : 
+Description : resnet50的预训练模型,效果似乎比不上vgg16,此文件忽略
 """
 
 
@@ -115,6 +115,7 @@ def main(path):
                                                         shuffle=True)
                          for x in ["train", "val"]}
     classes_index = data_image["train"].class_to_idx
+    class_num = len(classes_index)
     print(classes_index)
     print("训练集个数:", len(data_image["train"]))
     print("验证集个数:", len(data_image["val"]))
@@ -124,12 +125,12 @@ def main(path):
     use_gpu = torch.cuda.is_available()
     num_ftrs = model.fc.in_features
     model.fc = torch.nn.Sequential(torch.nn.Linear(num_ftrs, 4096),
+                                           # torch.nn.ReLU(),
+                                           # torch.nn.Dropout(p=0.5),
+                                           # torch.nn.Linear(4096, 4096),
                                            torch.nn.ReLU(),
                                            torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 4096),
-                                           torch.nn.ReLU(),
-                                           torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 2))
+                                           torch.nn.Linear(4096, class_num))
 
     if use_gpu:
         model = model.cuda()

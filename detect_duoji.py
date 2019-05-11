@@ -1,11 +1,19 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
-分类器检查
+Author : Jason
+Github : https://github.com/yuquant
+Description :   舵机控制代码参考
 """
+from collections import deque
 import numpy as np
 import cv2
+import time
 import torch
 import torchvision
+import RPi.GPIO as GPIO
+import time
+import signal
+import atexit
 
 
 def load_model():
@@ -34,6 +42,14 @@ def transform(arr):
 
 
 def main():
+    # 舵机初始化
+    atexit.register(GPIO.cleanup)
+    servopin = 21
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(servopin, GPIO.OUT, initial=False)
+    p = GPIO.PWM(servopin, 50)  # 50HZ    
+    p.start(0)
+    # 开启相机
     camera = cv2.VideoCapture(0)
     camera.set(3, 224)  # 设置分辨率
     camera.set(4, 224)
@@ -50,23 +66,42 @@ def main():
         if not ret:
             print('No Camera')
             continue
-        # frame = cv2.imread('jdb.jpg')
-        # 按照训练时所作的操作处理图像
         inputs = transform(frame)
-        # 将图像输入到模型中预测
         outputs = model(inputs)
         _, pred = torch.max(outputs, 1)
         target = CLASS_DICT[pred.item()]
-        # if target_last == target:
-        #     print(target)
-        #     cv2.putText(frame, target, (20, 20), cv2.FONT_HERSHEY_COMPLEX, 1,
-        #                 (0, 255, 0), 1)  # print(yanhe)
-        target_last = target
         print(target)
-        # 写入文字到图像中
         cv2.putText(frame, target, (20, 20), cv2.FONT_HERSHEY_COMPLEX, 1,
                     (0, 255, 0), 1)
         cv2.imshow('Frame', frame)
+        if target_last != target:
+            if pred.item() == 0:
+                # 舵机旋转180度,再恢复原状
+                for i in range(0, 181, 10):
+                    p.ChangeDutyCycle(2.5 + 10 * i / 180)  # 设置转动角度
+                    time.sleep(0.02)  # 等该20ms周期结束
+                    p.ChangeDutyCycle(0)  # 归零信号
+                    time.sleep(0.2)
+
+                for i in range(181, 0, -10):
+                    p.ChangeDutyCycle(2.5 + 10 * i / 180)
+                    time.sleep(0.02)
+                    p.ChangeDutyCycle(0)
+                    time.sleep(0.2)
+            if pred.item() == 2:
+                # 舵机反向旋转180度,再恢复原状
+                for i in range(181, 0, -10):
+                    p.ChangeDutyCycle(2.5 + 10 * i / 180)
+                    time.sleep(0.02)
+                    p.ChangeDutyCycle(0)
+                    time.sleep(0.2)
+                for i in range(0, 181, 10):
+                    p.ChangeDutyCycle(2.5 + 10 * i / 180)  # 设置转动角度
+                    time.sleep(0.02)  # 等该20ms周期结束
+                    p.ChangeDutyCycle(0)  # 归零信号
+                    time.sleep(0.2)
+        target_last = target
+
         # 键盘检测，检测到esc键退出
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
@@ -78,6 +113,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # 类别输出的数值对应的类别的字典
-    CLASS_DICT = {0: 'circle', 1: 'nothing', 2: 'rectangle'}
+    CLASS_DICT = {0: 'circle', 1: 'empty', 2: 'rectangle'}
     main()

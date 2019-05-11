@@ -2,7 +2,8 @@
 """
 Author : Jason
 Github : https://github.com/yuquant
-Description : 
+Description :
+卷积神经网络  迁移学习  vgg16 预训练权重训练
 """
 
 
@@ -67,12 +68,17 @@ class Normalize(object):
 
 def main(path):
     transform = transforms.Compose([
-                                    transforms.Resize(size=(224, 224)),
-                                    # 归一化,直接除以255
-                                    transforms.ToTensor(),
-                                    # 减去imagenet均值 除以标准差  ,第一个epoch加上94,不加0.89
-                                    # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-                                    Normalize(),  # 按照每张图标准化,准确率有略微提升
+        transforms.Resize(size=(224, 224)),
+        # 归一化,直接除以255
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.ColorJitter(brightness=0.2, contrast=0, saturation=0, hue=0),
+        transforms.RandomRotation(degrees=15),
+        # transforms.Grayscale(),
+        transforms.ToTensor(),
+        # 减去imagenet均值 除以标准差  ,第一个epoch加上94,不加0.89
+        # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        Normalize(),  # 按照每张图标准化,准确率有略微提升
                                     ])
 
     data_image = {x: datasets.ImageFolder(root=os.path.join(path, x),
@@ -84,6 +90,7 @@ def main(path):
                                                         shuffle=True)
                          for x in ["train", "val"]}
     classes_index = data_image["train"].class_to_idx
+    class_num = len(classes_index)
     print(classes_index)
     print("训练集个数:", len(data_image["train"]))
     print("验证集个数:", len(data_image["val"]))
@@ -92,12 +99,12 @@ def main(path):
         parma.requires_grad = False
     use_gpu = torch.cuda.is_available()
     model.classifier = torch.nn.Sequential(torch.nn.Linear(25088, 4096),
+                                           # torch.nn.ReLU(),
+                                           # torch.nn.Dropout(p=0.5),
+                                           # torch.nn.Linear(4096, 4096),
                                            torch.nn.ReLU(),
                                            torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 4096),
-                                           torch.nn.ReLU(),
-                                           torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 2))
+                                           torch.nn.Linear(4096, class_num))
 
     if use_gpu:
         model = model.cuda()
@@ -144,14 +151,15 @@ def main(path):
             epoch_correct = 100 * running_correct / len(data_image[param])
 
             print("{}  Loss:{:.4f},  Correct{:.4f}".format(param, epoch_loss, epoch_correct))
+            torch.save(model.state_dict(), "model_vgg16_finetune.pth")
+
         now_time = time.time() - since
         print("Training time is:{:.0f}m {:.0f}s".format(now_time // 60, now_time % 60))
 
-        torch.save(model.state_dict(), "model_vgg16_finetune.pth")
-
 
 if __name__ == "__main__":
-    IMAGE_FOLDER_PATH = r'D:\projects\detect\images'
+    # 训练集所在文件夹
+    IMAGE_FOLDER_PATH = r'images'
     EPOCHS = 5
     BATCH_SIZE = 4
     main(IMAGE_FOLDER_PATH)
