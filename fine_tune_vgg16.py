@@ -8,18 +8,72 @@ Description :
 
 import torch
 import torchvision
-from torchvision import datasets,transforms, models
+from torchvision import datasets, transforms, models
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 import time
 
+torch.manual_seed(551)
+torch.cuda.manual_seed_all(551)
+np.random.seed(551)
+
+
+class Normalize(object):
+    """Normalize a tensor image with mean and standard deviation.
+    Given mean: ``(M1,...,Mn)`` and std: ``(S1,..,Sn)`` for ``n`` channels, this transform
+    will normalize each channel of the input ``torch.*Tensor`` i.e.
+    ``input[channel] = (input[channel] - mean[channel]) / std[channel]``
+
+    Args:
+        mean (sequence): Sequence of means for each channel.
+        std (sequence): Sequence of standard deviations for each channel.
+    """
+
+    @staticmethod
+    def normalize(tensor):
+        """Normalize a tensor image with mean and standard deviation.
+
+        See ``Normalize`` for more details.
+
+        Args:
+            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+            mean (sequence): Sequence of means for each channel.
+            std (sequence): Sequence of standard deviations for each channely.
+
+        Returns:
+            Tensor: Normalized Tensor image.
+        """
+        # TODO: make efficient
+
+        for t in tensor:
+            m = t.mean()
+            s = t.std()
+            t.sub_(m).div_(s)
+        return tensor
+
+    def __call__(self, tensor):
+        """
+        Args:
+            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+
+        Returns:
+            Tensor: Normalized Tensor image.
+        """
+        tensor = self.normalize(tensor)
+        return tensor
+
 
 def main(path):
-    transform = transforms.Compose([transforms.CenterCrop(224),
+    transform = transforms.Compose([
+                                    transforms.Resize(size=(224, 224)),
+                                    # 归一化,直接除以255
                                     transforms.ToTensor(),
-                                    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+                                    # 减去imagenet均值 除以标准差  ,第一个epoch加上94,不加0.89
+                                    # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+                                    Normalize(),  # 按照每张图标准化,准确率有略微提升
+                                    ])
 
     data_image = {x: datasets.ImageFolder(root=os.path.join(path, x),
                                           transform=transform)
@@ -97,7 +151,7 @@ def main(path):
 
 
 if __name__ == "__main__":
-    IMAGE_FOLDER_PATH = r'D:\data\dogcat'
+    IMAGE_FOLDER_PATH = r'D:\projects\detect\images'
     EPOCHS = 5
     BATCH_SIZE = 4
     main(IMAGE_FOLDER_PATH)

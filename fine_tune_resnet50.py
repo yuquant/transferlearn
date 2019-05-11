@@ -15,6 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.autograd import Variable
 import time
+torch.manual_seed(551)
+torch.cuda.manual_seed_all(551)
+np.random.seed(551)
 
 
 def train_model(model, criterion, optimizer, data_image, dataloaders, device, num_epochs=25):
@@ -100,7 +103,8 @@ def train_model(model, criterion, optimizer, data_image, dataloaders, device, nu
 def main(path):
     transform = transforms.Compose([transforms.CenterCrop(224),
                                     transforms.ToTensor(),
-                                    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+                                    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+                                    ])
 
     data_image = {x: datasets.ImageFolder(root=os.path.join(path, x),
                                           transform=transform)
@@ -120,9 +124,9 @@ def main(path):
     use_gpu = torch.cuda.is_available()
     num_ftrs = model.fc.in_features
     model.fc = torch.nn.Sequential(torch.nn.Linear(num_ftrs, 4096),
-                                           # torch.nn.ReLU(),
-                                           # torch.nn.Dropout(p=0.5),
-                                           # torch.nn.Linear(4096, 4096),
+                                           torch.nn.ReLU(),
+                                           torch.nn.Dropout(p=0.5),
+                                           torch.nn.Linear(4096, 4096),
                                            torch.nn.ReLU(),
                                            torch.nn.Dropout(p=0.5),
                                            torch.nn.Linear(4096, 2))
@@ -144,7 +148,7 @@ def main(path):
 
 
 if __name__ == "__main__":
-    IMAGE_FOLDER_PATH = r'D:\data\dogcat'
+    IMAGE_FOLDER_PATH = r'D:\projects\detect\images'
     EPOCHS = 5
     BATCH_SIZE = 4
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

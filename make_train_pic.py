@@ -11,6 +11,8 @@ import time
 
 def main(class_name):
     camera = cv2.VideoCapture(0)
+    camera.set(3, 224)  # 设置分辨率
+    camera.set(4, 224)
     # 等待两秒
     time.sleep(2)
     i = 1
@@ -19,11 +21,12 @@ def main(class_name):
         (ret, frame) = camera.read()
         cv2.imshow('Frame', frame)
         i += 1
-        folder_path = os.path.join('images', class_name)
+        folder_path = os.path.join('images_all', class_name)
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
+        # frame = cv2.resize(frame, (224,224))
         cv2.imwrite(os.path.join(folder_path, '{class_name}{num}.jpg'.format(class_name=class_name, num=i)), frame)
-        time.sleep(0.5)
+        time.sleep(0.1)
         # 键盘检测，检测到esc键退出
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
@@ -35,5 +38,5 @@ def main(class_name):
 
 
 if __name__ == "__main__":
-    CLASS_NAME = 'circle'
+    CLASS_NAME = 'empty'
     main(CLASS_NAME)

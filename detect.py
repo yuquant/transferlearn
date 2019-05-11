@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+https://blog.csdn.net/qq_31077649/article/details/75194719
+"""
 from collections import deque
 import numpy as np
 import cv2
@@ -58,7 +61,7 @@ if __name__ == "__main__":
     # 遍历每一帧，检测
     while True:
         # 读取帧
-        time.sleep(0.5)
+        time.sleep(0.1)
         result = []
         (ret, frame) = camera.read()
         ret = 1
