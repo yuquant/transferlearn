@@ -38,6 +38,6 @@ def main(class_name):
 
 
 if __name__ == "__main__":
-    # 采集的图像类别,将文件存放到工作目录的'images'下
+    # 采集的图像类别,将文件存放到工作目录的'images_all'下
     CLASS_NAME = 'empty'
     main(CLASS_NAME)
