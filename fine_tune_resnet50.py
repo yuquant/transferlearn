@@ -150,7 +150,7 @@ def main(path):
 
 if __name__ == "__main__":
     IMAGE_FOLDER_PATH = r'D:\projects\detect\images'
-    EPOCHS = 5
+    EPOCHS = 10
     BATCH_SIZE = 4
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     main(IMAGE_FOLDER_PATH)

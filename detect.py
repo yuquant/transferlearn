@@ -6,9 +6,25 @@ import numpy as np
 import cv2
 import torch
 import torchvision
+from MobileNetV2 import MobileNetV2
 
 
-def load_model():
+def load_model_mobile_net():
+    model = MobileNetV2(n_class=1000)
+    model.classifier = torch.nn.Sequential(
+        torch.nn.Linear(model.last_channel, 4096),
+        # torch.nn.ReLU(),
+        # torch.nn.Dropout(p=0.5),
+        # torch.nn.Linear(4096, 4096),
+        torch.nn.ReLU(),
+        torch.nn.Dropout(p=0.5),
+        torch.nn.Linear(4096, len(CLASS_DICT))
+    )
+    model.load_state_dict(torch.load('model_mobilenetv2_finetune_best.pth'))
+    return model
+
+
+def load_model_vgg16():
     model = torchvision.models.vgg16(pretrained=False)
     model.classifier = torch.nn.Sequential(torch.nn.Linear(25088, 4096),
                                            # torch.nn.ReLU(),
@@ -17,7 +33,7 @@ def load_model():
                                            torch.nn.ReLU(),
                                            torch.nn.Dropout(p=0.5),
                                            torch.nn.Linear(4096, len(CLASS_DICT)))
-    model.load_state_dict(torch.load('model_vgg16_finetune.pth'))
+    model.load_state_dict(torch.load('model_vgg16_finetune_best.pth'))
 
     return model
 
@@ -39,7 +55,10 @@ def main():
     camera.set(4, 224)
     # 等待两秒
     # 加载模型
-    model = load_model()
+    if MODEL_NAME == 'VGG16':
+        model = load_model_vgg16()
+    elif MODEL_NAME == 'MOBILE_NET':
+        model = load_model_mobile_net()
     model.eval()
     # 遍历每一帧
     target_last = ''
@@ -80,4 +99,5 @@ def main():
 if __name__ == "__main__":
     # 类别输出的数值对应的类别的字典
     CLASS_DICT = {0: 'circle', 1: 'nothing', 2: 'rectangle'}
+    MODEL_NAME = 'MOBILE_NET'  # 'VGG16' 或者 'MOBILE_NET'
     main()

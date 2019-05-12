@@ -2,6 +2,16 @@
 """
 Author : Jason
 Github : https://github.com/yuquant
+Description : 
+"""
+import torch
+from MobileNetV2 import MobileNetV2
+from torchvision import datasets, transforms
+
+# -*- coding: utf-8 -*-
+"""
+Author : Jason
+Github : https://github.com/yuquant
 Description :
 卷积神经网络  迁移学习  vgg16 预训练权重训练
 """
@@ -21,51 +31,6 @@ torch.cuda.manual_seed_all(551)
 np.random.seed(551)
 
 
-class Normalize(object):
-    """Normalize a tensor image with mean and standard deviation.
-    Given mean: ``(M1,...,Mn)`` and std: ``(S1,..,Sn)`` for ``n`` channels, this transform
-    will normalize each channel of the input ``torch.*Tensor`` i.e.
-    ``input[channel] = (input[channel] - mean[channel]) / std[channel]``
-
-    Args:
-        mean (sequence): Sequence of means for each channel.
-        std (sequence): Sequence of standard deviations for each channel.
-    """
-
-    @staticmethod
-    def normalize(tensor):
-        """Normalize a tensor image with mean and standard deviation.
-
-        See ``Normalize`` for more details.
-
-        Args:
-            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
-            mean (sequence): Sequence of means for each channel.
-            std (sequence): Sequence of standard deviations for each channely.
-
-        Returns:
-            Tensor: Normalized Tensor image.
-        """
-        # TODO: make efficient
-
-        for t in tensor:
-            m = t.mean()
-            s = t.std()
-            t.sub_(m).div_(s)
-        return tensor
-
-    def __call__(self, tensor):
-        """
-        Args:
-            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
-
-        Returns:
-            Tensor: Normalized Tensor image.
-        """
-        tensor = self.normalize(tensor)
-        return tensor
-
-
 def main():
     transform = transforms.Compose([
         transforms.Resize(size=(224, 224)),
@@ -74,11 +39,12 @@ def main():
         transforms.RandomVerticalFlip(),
         transforms.ColorJitter(brightness=0.2, contrast=0, saturation=0, hue=0),
         transforms.RandomRotation(degrees=15),
-        # transforms.Grayscale(num_output_channels=3),
+        # transforms.Grayscale(),
         transforms.ToTensor(),
         # 减去imagenet均值 除以标准差  ,第一个epoch加上94,不加0.89
-        # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        Normalize(),  # 按照每张图标准化,准确率有略微提升
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225]),
+        # Normalize(),  # 按照每张图标准化,准确率有略微提升
                                     ])
 
     data_image = {x: datasets.ImageFolder(root=os.path.join(IMAGE_FOLDER_PATH, x),
@@ -95,10 +61,13 @@ def main():
     print("训练集个数:", len(data_image["train"]))
     print("验证集个数:", len(data_image["val"]))
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # 加载迁移学习模型
+    model = MobileNetV2(n_class=1000)
     if not CONTINUE_TRAIN:
-        model = models.vgg16(pretrained=True)
+        # add map_location='cpu' if no gpu
+        model.load_state_dict(torch.load('mobilenet_v2.pth'))
         model.classifier = torch.nn.Sequential(
-            torch.nn.Linear(25088, 4096),
+            torch.nn.Linear(model.last_channel, 4096),
             # torch.nn.ReLU(),
             # torch.nn.Dropout(p=0.5),
             # torch.nn.Linear(4096, 4096),
@@ -107,9 +76,8 @@ def main():
             torch.nn.Linear(4096, class_num)
         )
     else:
-        model = models.vgg16(pretrained=False)
         model.classifier = torch.nn.Sequential(
-            torch.nn.Linear(25088, 4096),
+            torch.nn.Linear(model.last_channel, 4096),
             # torch.nn.ReLU(),
             # torch.nn.Dropout(p=0.5),
             # torch.nn.Linear(4096, 4096),
@@ -117,8 +85,8 @@ def main():
             torch.nn.Dropout(p=0.5),
             torch.nn.Linear(4096, class_num)
         )
-        state_dict = torch.load(WEIGHT_NAME)  # add map_location='cpu' if no gpu
-        model.load_state_dict(state_dict)
+        model.load_state_dict(torch.load('model_mobilenetv2_finetune.pth'))
+    # 冻结卷积层
     for parma in model.parameters():
         parma.requires_grad = False
     for parma in model.classifier.parameters():
@@ -163,7 +131,7 @@ def main():
             epoch_correct = 100 * running_correct / len(data_image[param])
 
             print("{}  Loss:{:.4f},  Correct{:.4f}".format(param, epoch_loss, epoch_correct))
-            torch.save(model.state_dict(), WEIGHT_NAME)
+            torch.save(model.state_dict(), "model_mobilenetv2_finetune.pth")
 
         now_time = time.time() - since
         print("Training time is:{:.0f}m {:.0f}s".format(now_time // 60, now_time % 60))
@@ -171,10 +139,10 @@ def main():
 
 if __name__ == "__main__":
     # 训练集所在文件夹
-
     IMAGE_FOLDER_PATH = r'images'
     EPOCHS = 10
     BATCH_SIZE = 4
-    CONTINUE_TRAIN = False
-    WEIGHT_NAME = "model_vgg16_finetune.pth"
+    CONTINUE_TRAIN = True
     main()
+
+
