@@ -1,0 +1,84 @@
+Connected to pydev debugger (build 173.4674.37)
+{'circle': 0, 'empty': 1, 'rectangle': 2}
+训练集个数: 6240
+验证集个数: 300
+Epoch0/10
+----------
+Batch 500, Train Loss:0.2446, Train ACC:68.0000
+Batch 1000, Train Loss:0.1849, Train ACC:74.0000
+Batch 1500, Train Loss:0.1667, Train ACC:76.0000
+train  Loss:0.1655,  Correct76.0000
+val  Loss:0.0882,  Correct87.0000
+Training time is:1m 32s
+Epoch1/10
+----------
+Batch 500, Train Loss:0.1204, Train ACC:82.0000
+Batch 1000, Train Loss:0.1151, Train ACC:82.0000
+Batch 1500, Train Loss:0.1115, Train ACC:83.0000
+train  Loss:0.1120,  Correct83.0000
+val  Loss:0.1291,  Correct77.0000
+Training time is:1m 33s
+Epoch2/10
+----------
+Batch 500, Train Loss:0.1116, Train ACC:82.0000
+Batch 1000, Train Loss:0.1056, Train ACC:83.0000
+Batch 1500, Train Loss:0.1029, Train ACC:84.0000
+train  Loss:0.1026,  Correct84.0000
+val  Loss:0.0925,  Correct86.0000
+Training time is:1m 30s
+Epoch3/10
+----------
+Batch 500, Train Loss:0.0900, Train ACC:86.0000
+Batch 1000, Train Loss:0.0913, Train ACC:85.0000
+Batch 1500, Train Loss:0.0913, Train ACC:85.0000
+train  Loss:0.0906,  Correct86.0000
+val  Loss:0.0935,  Correct85.0000
+Training time is:1m 30s
+Epoch4/10
+----------
+Batch 500, Train Loss:0.0887, Train ACC:85.0000
+Batch 1000, Train Loss:0.0886, Train ACC:85.0000
+Batch 1500, Train Loss:0.0850, Train ACC:86.0000
+train  Loss:0.0854,  Correct86.0000
+val  Loss:0.1039,  Correct83.0000
+Training time is:1m 34s
+Epoch5/10
+----------
+Batch 500, Train Loss:0.0851, Train ACC:86.0000
+Batch 1000, Train Loss:0.0801, Train ACC:87.0000
+Batch 1500, Train Loss:0.0796, Train ACC:87.0000
+train  Loss:0.0800,  Correct87.0000
+val  Loss:0.0921,  Correct85.0000
+Training time is:1m 33s
+Epoch6/10
+----------
+Batch 500, Train Loss:0.0707, Train ACC:88.0000
+Batch 1000, Train Loss:0.0748, Train ACC:88.0000
+Batch 1500, Train Loss:0.0734, Train ACC:88.0000
+train  Loss:0.0722,  Correct89.0000
+val  Loss:0.0958,  Correct87.0000
+Training time is:1m 32s
+Epoch7/10
+----------
+Batch 500, Train Loss:0.0710, Train ACC:89.0000
+Batch 1000, Train Loss:0.0747, Train ACC:89.0000
+Batch 1500, Train Loss:0.0733, Train ACC:89.0000
+train  Loss:0.0730,  Correct89.0000
+val  Loss:0.1227,  Correct83.0000
+Training time is:1m 33s
+Epoch8/10
+----------
+Batch 500, Train Loss:0.0735, Train ACC:89.0000
+Batch 1000, Train Loss:0.0738, Train ACC:88.0000
+Batch 1500, Train Loss:0.0734, Train ACC:89.0000
+train  Loss:0.0733,  Correct89.0000
+val  Loss:0.0775,  Correct87.0000
+Training time is:1m 32s
+Epoch9/10
+----------
+Batch 500, Train Loss:0.0675, Train ACC:89.0000
+Batch 1000, Train Loss:0.0695, Train ACC:89.0000
+Batch 1500, Train Loss:0.0696, Train ACC:89.0000
+train  Loss:0.0695,  Correct89.0000
+val  Loss:0.0717,  Correct90.0000
+Training time is:1m 33s

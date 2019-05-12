@@ -70,11 +70,11 @@ def main():
     transform = transforms.Compose([
         transforms.Resize(size=(224, 224)),
         # 归一化,直接除以255
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
-        transforms.ColorJitter(brightness=0.2, contrast=0, saturation=0, hue=0),
-        transforms.RandomRotation(degrees=15),
-        # transforms.Grayscale(num_output_channels=3),
+        transforms.RandomHorizontalFlip(),  # 随机水平反转
+        transforms.RandomVerticalFlip(),  # 随机垂直反转
+        transforms.ColorJitter(brightness=0.1, contrast=0, saturation=0, hue=0),  # 亮度随机浮动10%
+        transforms.RandomRotation(degrees=15),  # 随机旋转正负15度
+        # transforms.Grayscale(num_output_channels=3),  # 彩色图变成灰度图
         transforms.ToTensor(),
         # 减去imagenet均值 除以标准差  ,第一个epoch加上94,不加0.89
         # transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),

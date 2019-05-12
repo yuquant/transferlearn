@@ -99,5 +99,6 @@ def main():
 if __name__ == "__main__":
     # 类别输出的数值对应的类别的字典
     CLASS_DICT = {0: 'circle', 1: 'nothing', 2: 'rectangle'}
-    MODEL_NAME = 'MOBILE_NET'  # 'VGG16' 或者 'MOBILE_NET'
+    # 选择分类模型
+    MODEL_NAME = 'VGG16'  # 'VGG16' 或者 'MOBILE_NET'
     main()
